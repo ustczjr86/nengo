@@ -10,7 +10,7 @@ from nengo.exceptions import ValidationError
 from nengo.learning_rules import LearningRuleType, LearningRuleTypeParam
 from nengo.node import Node
 from nengo.params import (Default, Unconfigurable, ObsoleteParam,
-                          BoolParam, FunctionParam)
+                          BoolParam, FunctionInfo, FunctionParam)
 from nengo.solvers import LstsqL2, SolverParam
 from nengo.synapses import Lowpass, SynapseParam
 from nengo.utils.compat import is_array_like, is_iterable, iteritems
@@ -119,14 +119,16 @@ class ConnectionFunctionParam(FunctionParam):
 
     def __set__(self, conn, function):
         if function is None:
-            function_info = self.Info(function=None, size=None)
+            function_info = FunctionInfo(function=None, size=None)
+        elif isinstance(function, FunctionInfo):
+            function_info = function
         elif is_array_like(function):
             array = np.array(function, copy=False, dtype=np.float64)
             self.validate_array(conn, array)
-            function_info = self.Info(function=array, size=array.shape[1])
+            function_info = FunctionInfo(function=array, size=array.shape[1])
         elif callable(function):
-            function_info = self.Info(function=function,
-                                      size=self.determine_size(conn, function))
+            function_info = FunctionInfo(
+                function=function, size=self.determine_size(conn, function))
             self.validate_callable(conn, function_info)
         else:
             raise ValidationError("Invalid connection function type %r "
@@ -376,6 +378,10 @@ class Connection(NengoObject):
         "Connect to a learning rule instead.",
         since="v2.1.0",
         url="https://github.com/nengo/nengo/issues/632#issuecomment-71663849")
+
+    _param_init_order = [
+        'pre', 'post', 'synapse', 'transform', 'eval_points', 'function_info',
+        'solver', 'learning_rule_type']
 
     def __init__(self, pre, post, synapse=Default, function=Default,
                  transform=Default, solver=Default, learning_rule_type=Default,
