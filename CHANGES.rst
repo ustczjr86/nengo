@@ -83,6 +83,12 @@ Release History
   ``input_keys`` and ``output_keys``.
   (`#982 <https://github.com/nengo/nengo/pull/982>`_)
 
+**API changes**
+
+- Added `copy` method to Nengo object and allow pickling of Nengo objects.
+  (`#977 <https://github.com/nengo/nengo/issues/977>`_,
+  `#984 <https://github.com/nengo/nengo/pull/984>`_)
+
 **Bug fixes**
 
 - The DecoderCache is used as context manager instead of relying on the
