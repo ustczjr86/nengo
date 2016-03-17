@@ -84,6 +84,10 @@ class ClassParams(object):
         return "<%s[%s]{%s}>" % (type(self).__name__,
                                  self._configures.__name__, ", ".join(params))
 
+    def __setstate__(self, state):
+        for k, v in state.items():
+            setattr(self, k, v)
+
     @property
     def default_params(self):
         return self._default_params
