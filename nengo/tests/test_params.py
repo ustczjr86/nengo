@@ -313,23 +313,10 @@ def test_functionparam():
         inst.fp = 0
 
 
-def test_params_function_does_not_list_obsolete_params():
+def test_get_params_does_not_list_obsolete_params():
     class Test(object):
         p1 = params.IntParam('p1')
         p2 = params.IntParam('p2')
         obsolete = params.ObsoleteParam('obsolete', 'not included in params')
 
-    assert set(params.params(Test())) == {'p1', 'p2'}
-
-
-def test_copyable_object():
-    class Test(params.CopyableObject):
-        p1 = params.IntParam('p1')
-
-    original = Test()
-    original.p1 = 2
-
-    copied = copy(original)
-
-    assert copied is not original  # ensures that parameters are separate
-    assert copied.p1 == 2
+    assert set(params.get_params(Test())) == {'p1', 'p2'}
