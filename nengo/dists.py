@@ -309,6 +309,40 @@ class Choice(Distribution):
         return self.options[i]
 
 
+class Tile(Distribution):
+    """Choose values in order from an array
+
+    This distribution is not random, but rather tiles an array to be a
+    particular size. This is useful for example if you want to pass an array
+    for a neuron parameter, but are not sure how many neurons there will be.
+
+    Parameters
+    ----------
+    values : array_like
+        The values to tile.
+    """
+
+    values = NdarrayParam('values', shape=('*', '*'))
+
+    def __init__(self, values):
+        super(Tile, self).__init__()
+        self.values = values
+
+    def __repr__(self):
+        return "Tile(values=%s)" % (self.values)
+
+    def sample(self, n, d=None, rng=np.random):
+        nv, dv = self.values.shape
+
+        if n > nv or d > dv:
+            values = np.tile(self.values, (int(np.ceil(float(n) / nv)),
+                                           int(np.ceil(float(d) / dv))))
+        else:
+            values = self.values
+
+        return values[:n, :d]
+
+
 class SqrtBeta(Distribution):
     """Distribution of the square root of a Beta distributed random variable.
 
