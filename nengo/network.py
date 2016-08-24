@@ -8,6 +8,7 @@ from nengo.exceptions import (
     ConfigError, NetworkContextError, NotAddedToNetworkWarning, ReadonlyError)
 from nengo.node import Node
 from nengo.probe import Probe
+from nengo.utils.compat import iteritems
 from nengo.utils.threading import ThreadLocalStack
 
 

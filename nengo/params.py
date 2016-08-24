@@ -421,7 +421,6 @@ FunctionInfo = collections.namedtuple('FunctionInfo', ['function', 'size'])
 class FunctionParam(Parameter):
     """A parameter where the value is a function."""
 
-
     def __set__(self, instance, function):
         if isinstance(function, FunctionInfo):
             function_info = function

@@ -57,11 +57,11 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         The seed used for random number generation.
     """
 
-    _param_init_order = []  # Order in which parameters have to be initialized.
-                            # Missing parameters will be initialized last in an
-                            # undefined order. This needs to defined to allow
-                            # pickling and copying of Nengo objects if the
-                            # parameter initialization order matters.
+    # Order in which parameters have to be initialized.
+    # Missing parameters will be initialized last in an undefined order.
+    # This is needed for pickling and copying of Nengo objects when the
+    # parameter initialization order matters.
+    _param_init_order = []
 
     label = StringParam('label', default=None, optional=True)
     seed = IntParam('seed', default=None, optional=True)
