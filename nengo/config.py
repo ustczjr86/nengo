@@ -67,8 +67,9 @@ class ClassParams(object):
             param.set_default(self, value)
 
     def __getstate__(self):
-        state = {k: getattr(self, k) for k in (
-            '_configures', '_extra_params', '_default_params')}
+        state = {'_configures': self._configures,
+                 '_default_params': self._default_params,
+                 '_extra_params': self._extra_params}
 
         # Store all of the things we set in the params
         for attr in self.params():
@@ -80,8 +81,8 @@ class ClassParams(object):
 
     def __setstate__(self, state):
         self._configures = state['_configures']
-        self._default_params = tuple(state['_default_params'])
-        self._extra_params = dict(state['_extra_params'])
+        self._default_params = state['_default_params']
+        self._extra_params = state['_extra_params']
 
         # Restore all of the things we set in the params
         for attr in self.params():
