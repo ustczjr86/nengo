@@ -33,6 +33,9 @@ Release History
   be removed in Nengo 3.0. Instead, pass the targets directly to the
   connection through the ``function`` argument.
   (`#1010 <https://github.com/nengo/nengo/pull/1010>`_)
+- Added ``copy`` method to Nengo objects. Nengo objects can now be pickled.
+  (`#977 <https://github.com/nengo/nengo/issues/977>`_,
+  `#984 <https://github.com/nengo/nengo/pull/984>`_)
 
 **Improvements**
 
@@ -82,12 +85,6 @@ Release History
 - Allow the ``AssociativeMemory`` to accept Semantic Pointer expressions as
   ``input_keys`` and ``output_keys``.
   (`#982 <https://github.com/nengo/nengo/pull/982>`_)
-
-**API changes**
-
-- Added `copy` method to Nengo object and allow pickling of Nengo objects.
-  (`#977 <https://github.com/nengo/nengo/issues/977>`_,
-  `#984 <https://github.com/nengo/nengo/pull/984>`_)
 
 **Bug fixes**
 
