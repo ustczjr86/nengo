@@ -46,184 +46,174 @@ def assert_is_deepcopy(cp, original):
             assert param_inst == getattr(original, param)
 
 
-class CopyTest(object):
-    """This is a base class for other test classes testing the actual copying
-    of objects.
+def make_ensemble():
+    with nengo.Network():
+        e = nengo.Ensemble(10, 1, radius=2.)
+    return e
 
-    It provides a set of standard tests that all copyable objects need to
-    support.
 
-    The deriving class needs to implement the ``create_original`` function.
-    """
+def test_neurons_reference_copy():
+    original = make_ensemble()
+    cp = original.copy(add_to_container=False)
+    assert original.neurons.ensemble is original
+    assert cp.neurons.ensemble is cp
 
-    def create_original(self):
-        """Create and return the object to test the copy operation for."""
-        raise NotImplementedError()
 
-    def assert_is_copy(self, cp, original):
-        assert_is_copy(cp, original)
+def make_probe():
+    with nengo.Network():
+        e = nengo.Ensemble(10, 1)
+        p = nengo.Probe(e, synapse=0.01)
+    return p
 
-    def test_copy_in_network(self):
-        original = self.create_original()
+
+def make_node():
+    with nengo.Network():
+        n = nengo.Node(np.min, size_in=2, size_out=2)
+    return n
+
+
+def make_connection():
+    with nengo.Network():
+        e1 = nengo.Ensemble(10, 1)
+        e2 = nengo.Ensemble(10, 1)
+        c = nengo.Connection(e1, e2, transform=2.)
+    return c
+
+
+def make_network():
+    with nengo.Network() as model:
+        e1 = nengo.Ensemble(10, 1)
+        e2 = nengo.Ensemble(10, 1)
+        nengo.Connection(e1, e2, transform=2.)
+        nengo.Probe(e2)
+    return model
+
+
+def test_copy_in_network_default_add():
+    original = make_network()
+
+    with nengo.Network() as model:
+        cp = original.copy()
+    assert cp in model.all_objects
+
+    assert_is_deepcopy(cp, original)
+
+
+def test_copy_outside_network_default_add():
+    original = make_network()
+    cp = original.copy()
+    assert_is_deepcopy(cp, original)
+
+
+def test_network_copies_defaults():
+    original = nengo.Network()
+    original.config[nengo.Ensemble].radius = 1.5
+    original.config[nengo.Connection].synapse = nengo.Lowpass(0.1)
+
+    cp = original.copy()
+    assert cp.config[nengo.Ensemble].radius == 1.5
+    assert cp.config[nengo.Connection].synapse == nengo.Lowpass(0.1)
+
+
+def test_network_copy_allows_independent_manipulation():
+    with nengo.Network() as original:
+        nengo.Ensemble(10, 1)
+    original.config[nengo.Ensemble].radius = 1.
+
+    cp = original.copy()
+    with cp:
+        e2 = nengo.Ensemble(10, 1)
+    cp.config[nengo.Ensemble].radius = 2.
+
+    assert e2 not in original.ensembles
+    assert original.config[nengo.Ensemble].radius == 1.
+
+
+def test_copies_structure():
+    with nengo.Network() as original:
+        e1 = nengo.Ensemble(10, 1)
+        e2 = nengo.Ensemble(10, 1)
+        nengo.Connection(e1, e2)
+        nengo.Probe(e2)
+
+    cp = original.copy()
+
+    assert cp.connections[0].pre is not e1
+    assert cp.connections[0].post is not e2
+    assert cp.connections[0].pre in cp.ensembles
+    assert cp.connections[0].post in cp.ensembles
+
+    assert cp.probes[0].target is not e2
+    assert cp.probes[0].target in cp.ensembles
+
+
+def test_network_copy_builds(RefSimulator):
+    RefSimulator(make_network().copy())
+
+
+@pytest.mark.parametrize(('make_f', 'assert_f'), [
+    (make_ensemble, assert_is_copy),
+    (make_probe, assert_is_copy),
+    (make_node, assert_is_copy),
+    (make_connection, assert_is_copy),
+    (make_network, assert_is_copy),
+])
+class TestCopy(object):
+    """A basic set of tests that should pass for all objects."""
+
+    def test_copy_in_network(self, make_f, assert_f):
+        original = make_f()
 
         with nengo.Network() as model:
             cp = original.copy(add_to_container=True)
         assert cp in model.all_objects
 
-        self.assert_is_copy(cp, original)
+        assert_f(cp, original)
 
-    def test_copy_in_network_without_adding(self):
-        original = self.create_original()
+    def test_copy_in_network_without_adding(self, make_f, assert_f):
+        original = make_f()
 
         with nengo.Network() as model:
             cp = original.copy(add_to_container=False)
         assert cp not in model.all_objects
 
-        self.assert_is_copy(cp, original)
+        assert_f(cp, original)
 
-    def test_copy_outside_network(self):
-        original = self.create_original()
+    def test_copy_outside_network(self, make_f, assert_f):
+        original = make_f()
         with pytest.raises(NetworkContextError):
             original.copy(add_to_container=True)
 
-    def test_copy_outside_network_without_adding(self):
-        original = self.create_original()
+    def test_copy_outside_network_without_adding(self, make_f, assert_f):
+        original = make_f()
         cp = original.copy(add_to_container=False)
-        self.assert_is_copy(cp, original)
+        assert_f(cp, original)
 
-    def test_python_copy_warns_about_adding_to_network(self):
-        original = self.create_original()
+    def test_python_copy_warns_abt_adding_to_network(self, make_f, assert_f):
+        original = make_f()
         copy(original)  # Fine because not in a network
         with nengo.Network():
             with warns(NotAddedToNetworkWarning):
                 copy(original)
 
 
-class PickleTest(object):
-    """This is a base class for other test classes testing the actual pickling
-    of objects.
+@pytest.mark.parametrize('make_f', (
+    make_ensemble, make_probe, make_node, make_connection, make_network
+))
+class TestPickle(object):
+    """A basic set of tests that should pass for all objects."""
 
-    It provides a set of standard tests that all pickeable objects need to
-    support.
-
-    The deriving class needs to implement the ``create_original`` function.
-    """
-
-    def create_original(self):
-        """Create and return the object to test pickling for."""
-        raise NotImplementedError()
-
-    def assert_is_unpickled(self, cp, original):
+    def test_pickle_roundtrip(self, make_f):
+        original = make_f()
+        cp = pickle.loads(pickle.dumps(original))
         assert_is_deepcopy(cp, original)
 
-    def test_pickle_roundtrip(self):
-        original = self.create_original()
-        cp = pickle.loads(pickle.dumps(original))
-        self.assert_is_unpickled(cp, original)
-
-    def test_unpickling_warning_in_network(self):
-        original = self.create_original()
+    def test_unpickling_warning_in_network(self, make_f):
+        original = make_f()
         pkl = pickle.dumps(original)
         with nengo.Network():
             with warns(NotAddedToNetworkWarning):
                 pickle.loads(pkl)
-
-
-class TestCopyEnsemble(CopyTest, PickleTest):
-    def create_original(self):
-        with nengo.Network():
-            e = nengo.Ensemble(10, 1, radius=2.)
-        return e
-
-    def test_neurons_reference_copy(self):
-        original = self.create_original()
-        cp = original.copy(add_to_container=False)
-        assert original.neurons.ensemble is original
-        assert cp.neurons.ensemble is cp
-
-
-class TestCopyProbe(CopyTest, PickleTest):
-    def create_original(self):
-        with nengo.Network():
-            e = nengo.Ensemble(10, 1)
-            p = nengo.Probe(e, synapse=0.01)
-        return p
-
-
-class TestCopyNode(CopyTest, PickleTest):
-    def create_original(self):
-        with nengo.Network():
-            n = nengo.Node(np.min, size_in=2, size_out=2)
-        return n
-
-
-class TestCopyConnection(CopyTest, PickleTest):
-    def create_original(self):
-        with nengo.Network():
-            e1 = nengo.Ensemble(10, 1)
-            e2 = nengo.Ensemble(10, 1)
-            c = nengo.Connection(e1, e2, transform=2.)
-        return c
-
-
-class TestCopyNetwork(CopyTest, PickleTest):
-    def create_original(self):
-        with nengo.Network() as model:
-            e1 = nengo.Ensemble(10, 1)
-            e2 = nengo.Ensemble(10, 1)
-            nengo.Connection(e1, e2, transform=2.)
-            nengo.Probe(e2)
-        return model
-
-    def assert_is_copy(self, cp, original):
-        assert_is_deepcopy(cp, original)
-
-    def test_copy_in_network_default_add(self):
-        original = self.create_original()
-
-        with nengo.Network() as model:
-            cp = original.copy()
-        assert cp in model.all_objects
-
-        self.assert_is_copy(cp, original)
-
-    def test_copy_outside_network_default_add(self):
-        original = self.create_original()
-        cp = original.copy()
-        self.assert_is_copy(cp, original)
-
-    def test_network_copy_allows_independent_manipulation(self):
-        with nengo.Network() as original:
-            nengo.Ensemble(10, 1)
-        original.config[nengo.Ensemble].radius = 1.
-
-        cp = original.copy()
-        with cp:
-            e2 = nengo.Ensemble(10, 1)
-        cp.config[nengo.Ensemble].radius = 2.
-
-        assert e2 not in original.ensembles
-        assert original.config[nengo.Ensemble].radius == 1.
-
-    def test_copies_structure(self):
-        with nengo.Network() as original:
-            e1 = nengo.Ensemble(10, 1)
-            e2 = nengo.Ensemble(10, 1)
-            nengo.Connection(e1, e2)
-            nengo.Probe(e2)
-
-        cp = original.copy()
-
-        assert cp.connections[0].pre is not e1
-        assert cp.connections[0].post is not e2
-        assert cp.connections[0].pre in cp.ensembles
-        assert cp.connections[0].post in cp.ensembles
-
-        assert cp.probes[0].target is not e2
-        assert cp.probes[0].target in cp.ensembles
-
-    def test_network_copy_builds(self, RefSimulator):
-        RefSimulator(self.create_original().copy())
 
 
 @pytest.mark.parametrize('original', [
@@ -239,8 +229,9 @@ class TestCopyNetwork(CopyTest, PickleTest):
     nengo.synapses.Lowpass(0.005),
     nengo.synapses.Alpha(0.005),
     nengo.synapses.Triangle(0.005),
-    ])
+])
 class TestFrozenObjectCopies(object):
+
     def test_copy(self, original):
         assert_is_copy(copy(original), original)
 
