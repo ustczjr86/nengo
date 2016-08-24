@@ -9,14 +9,13 @@ from nengo.exceptions import NotAddedToNetworkWarning, ValidationError
 from nengo.params import (
     FrozenObject,
     IntParam,
-    is_param,
     iter_params,
     NumberParam,
     Parameter,
     StringParam,
     Unconfigurable,
 )
-from nengo.utils.compat import is_integer, range, with_metaclass
+from nengo.utils.compat import is_integer, iteritems, range, with_metaclass
 from nengo.utils.numpy import as_shape, maxint
 
 
@@ -76,8 +75,8 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         state = self.__dict__.copy()
         del state['_initialized']
 
-        for attr in iter_params(self):
-            param = getattr(self.__class__, attr)
+        for attr in self.params():
+            param = getattr(type(self), attr)
             if self in param:
                 state[attr] = getattr(self, attr)
 
@@ -87,11 +86,11 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         for attr in self._param_init_order:
             setattr(self, attr, state.pop(attr))
 
-        for attr in iter_params(self):
+        for attr in self.params():
             if attr in state:
                 setattr(self, attr, state.pop(attr))
 
-        for k, v in state.items():
+        for k, v in iteritems(state):
             setattr(self, k, v)
 
         self._initialized = True
@@ -136,14 +135,10 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
             " at 0x%x" % id(self) if include_id else "")
 
     @classmethod
-    def param_list(cls):
+    def params(cls):
         """Returns a list of parameter names that can be set."""
-        return (attr for attr in dir(cls) if is_param(getattr(cls, attr)))
+        return iter_params(cls)
 
-    @property
-    def params(self):
-        """Returns a list of parameter names that can be set."""
-        return self.param_list()
 
 
 class ObjView(object):

@@ -33,7 +33,7 @@ class ClassParams(object):
         assert inspect.isclass(configures)
         self._configures = configures
         self._extraparams = {}
-        self._default_params = tuple(
+        self._defaultparams = tuple(
             attr for attr in dir(self._configures)
             if is_param(getattr(self._configures, attr)))
 
@@ -65,7 +65,7 @@ class ClassParams(object):
     def __str__(self):
         name = self._configures.__name__
         lines = ["Parameters configured for %s:" % name]
-        for attr in self.params:
+        for attr in self.params():
             if self in self.get_param(attr):
                 lines.append("  %s: %s" % (attr, getattr(self, attr)))
         if len(lines) > 1:
@@ -90,15 +90,14 @@ class ClassParams(object):
 
     @property
     def default_params(self):
-        return self._default_params
+        return self._defaultparams
 
     @property
     def extra_params(self):
         return tuple(self._extraparams)
 
-    @property
     def params(self):
-        return self.default_params + self.extra_params
+        return iter(self.default_params + self.extra_params)
 
     def get_param(self, key):
         if key in self._extraparams:
@@ -185,7 +184,7 @@ class InstanceParams(object):
 
     def __str__(self):
         lines = ["Parameters set for %s:" % str(self._configures)]
-        for attr in self._clsparams.params:
+        for attr in self._clsparams.params():
             if self in self._clsparams.get_param(attr):
                 lines.append("  %s: %s" % (attr, getattr(self, attr)))
         return "\n".join(lines)
