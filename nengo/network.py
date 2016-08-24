@@ -100,28 +100,6 @@ class Network(object):
         if add_to_container:
             Network.add(self)
 
-    def __setstate__(self, state):
-        for k, v in state.items():
-            setattr(self, k, v)
-        if len(Network.context) > 0:
-            warnings.warn(
-                "{obj} was not added to the network. When copying objects, "
-                "use the copy method on the object instead of Python's copy "
-                "module. When unpickling objects, they have to be added to "
-                "networks manually.".format(obj=self),
-                NotAddedToNetworkWarning)
-
-    def copy(self, add_to_container=None):
-        from nengo.network import Network
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', category=NotAddedToNetworkWarning)
-            c = deepcopy(self)
-        if add_to_container is None:
-            add_to_container = len(Network.context) > 0
-        if add_to_container:
-            Network.add(c)
-        return c
-
     @staticmethod
     def add(obj):
         """Add the passed object to ``Network.context``."""
@@ -225,6 +203,12 @@ class Network(object):
 
         self._config.__exit__(dummy_exc_type, dummy_exc_value, dummy_tb)
 
+    def __setstate__(self, state):
+        for k, v in iteritems(state):
+            setattr(self, k, v)
+        if len(Network.context) > 0:
+            warnings.warn(NotAddedToNetworkWarning(self))
+
     def __str__(self):
         return "<%s %s>" % (
             type(self).__name__,
@@ -236,3 +220,15 @@ class Network(object):
             type(self).__name__,
             '"%s"' % self.label if self.label is not None else "(unlabeled)",
             "at 0x%x" % id(self))
+
+    def copy(self, add_to_container=None):
+        with warnings.catch_warnings():
+            # We warn when copying since we can't change add_to_container.
+            # However, we deal with it here, so we ignore the warning.
+            warnings.simplefilter('ignore', category=NotAddedToNetworkWarning)
+            c = deepcopy(self)
+        if add_to_container is None:
+            add_to_container = len(Network.context) > 0
+        if add_to_container:
+            Network.add(c)
+        return c

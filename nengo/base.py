@@ -94,22 +94,8 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
             setattr(self, k, v)
 
         self._initialized = True
-        if len(Network.context) > 0:
-            warnings.warn(
-                "{obj} was not added to the network. When copying objects, "
-                "use the copy method on the object instead of Python's copy "
-                "module. When unpickling objects, they have to be added to "
-                "networks manually.".format(obj=self),
-                NotAddedToNetworkWarning)
-
-    def copy(self, add_to_container=True):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', category=NotAddedToNetworkWarning)
-            c = copy(self)
-        if add_to_container:
-            from nengo.network import Network
-            Network.add(c)
-        return c
+        if len(nengo.Network.context) > 0:
+            warnings.warn(NotAddedToNetworkWarning(self))
 
     def __setattr__(self, name, val):
         if hasattr(self, '_initialized') and not hasattr(self, name):
@@ -139,6 +125,15 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         """Returns a list of parameter names that can be set."""
         return iter_params(cls)
 
+    def copy(self, add_to_container=True):
+        with warnings.catch_warnings():
+            # We warn when copying since we can't change add_to_container.
+            # However, we deal with it here, so we ignore the warning.
+            warnings.simplefilter('ignore', category=NotAddedToNetworkWarning)
+            c = copy(self)
+        if add_to_container:
+            nengo.Network.add(c)
+        return c
 
 
 class ObjView(object):

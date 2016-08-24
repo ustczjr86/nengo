@@ -106,3 +106,14 @@ class TimeoutError(NengoException):
 
 class NotAddedToNetworkWarning(NengoWarning):
     """A NengoObject has not been added to a network."""
+
+    def __init__(self, obj):
+        self.obj = obj
+        super(NotAddedToNetworkWarning, self).__init__()
+
+    def __str__(self):
+        return (
+            "{obj} was not added to the network. When copying objects, "
+            "use the copy method on the object instead of Python's copy "
+            "module. When unpickling objects, they have to be added to "
+            "networks manually.".format(obj=self.obj))
