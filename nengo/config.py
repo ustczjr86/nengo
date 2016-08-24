@@ -47,6 +47,10 @@ class ClassParams(object):
             self.get_param(key).del_default(self)
 
     def __getattr__(self, key):
+        if key.startswith("_"):
+            # If we get here, then that attribute hasn't been set
+            raise AttributeError("%r object has no attribute %r"
+                                 % (type(self).__name__, key))
         return self.get_param(key).get_default(self)
 
     def __setattr__(self, key, value):
@@ -61,6 +65,28 @@ class ClassParams(object):
             if not param.configurable:
                 raise ConfigError("Parameter '%s' is not configurable" % key)
             param.set_default(self, value)
+
+    def __getstate__(self):
+        state = {k: getattr(self, k) for k in (
+            '_configures', '_extraparams', '_defaultparams')}
+
+        # Store all of the things we set in the params
+        for attr in self.params():
+            param = self.get_param(attr)
+            if self in param:
+                state[attr] = param.get_default(self)
+
+        return state
+
+    def __setstate__(self, state):
+        self._configures = state['_configures']
+        self._defaultparams = tuple(state['_defaultparams'])
+        self._extraparams = dict(state['_extraparams'])
+
+        # Restore all of the things we set in the params
+        for attr in self.params():
+            if attr in state:
+                self.get_param(attr).set_default(self, state[attr])
 
     def __str__(self):
         name = self._configures.__name__
@@ -83,10 +109,6 @@ class ClassParams(object):
 
         return "<%s[%s]{%s}>" % (type(self).__name__,
                                  self._configures.__name__, ", ".join(params))
-
-    def __setstate__(self, state):
-        for k, v in state.items():
-            setattr(self, k, v)
 
     @property
     def default_params(self):
