@@ -29,9 +29,10 @@ def is_param(obj):
 
 def iter_params(obj):
     """Iterate over the names of all parameters of an object."""
-    return (name for name in dir(type(obj))
-            if is_param(getattr(type(obj), name)) and not
-            isinstance(getattr(type(obj), name), ObsoleteParam))
+    obj = obj if inspect.isclass(obj) else type(obj)
+    return (name for name in dir(obj)
+            if is_param(getattr(obj, name)) and not
+            isinstance(getattr(obj, name), ObsoleteParam))
 
 
 class Parameter(object):
