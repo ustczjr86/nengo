@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 
+import nengo
 from nengo.config import SupportDefaultsMixin
 from nengo.exceptions import NotAddedToNetworkWarning, ValidationError
 from nengo.params import (
@@ -29,13 +30,12 @@ class NetworkMember(type):
 
     def __call__(cls, *args, **kwargs):
         """Override default __call__ behavior so that Network.add is called."""
-        from nengo.network import Network
         inst = cls.__new__(cls)
         add_to_container = kwargs.pop('add_to_container', True)
         # Do the __init__ before adding in case __init__ errors out
         inst.__init__(*args, **kwargs)
         if add_to_container:
-            Network.add(inst)
+            nengo.Network.add(inst)
         inst._initialized = True  # value doesn't matter, just existance
         return inst
 
@@ -84,8 +84,6 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         return state
 
     def __setstate__(self, state):
-        from nengo.network import Network
-
         for attr in self._param_init_order:
             setattr(self, attr, state.pop(attr))
 
@@ -221,10 +219,13 @@ class NengoObjectParam(Parameter):
             name, default, optional, readonly)
 
     def validate(self, instance, nengo_obj):
-        from nengo.ensemble import Neurons
-        from nengo.connection import LearningRule
-        if not isinstance(nengo_obj, (
-                NengoObject, ObjView, Neurons, LearningRule)):
+        nengo_objects = (
+            NengoObject,
+            ObjView,
+            nengo.ensemble.Neurons,
+            nengo.connection.LearningRule
+        )
+        if not isinstance(nengo_obj, nengo_objects):
             raise ValidationError("'%s' is not a Nengo object" % nengo_obj,
                                   attr=self.name, obj=instance)
         if self.nonzero_size_in and nengo_obj.size_in < 1:
