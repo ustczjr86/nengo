@@ -313,10 +313,10 @@ def test_functionparam():
         inst.fp = 0
 
 
-def test_get_params_does_not_list_obsolete_params():
+def test_iter_params_does_not_list_obsolete_params():
     class Test(object):
         p1 = params.IntParam('p1')
         p2 = params.IntParam('p2')
         obsolete = params.ObsoleteParam('obsolete', 'not included in params')
 
-    assert set(params.get_params(Test())) == {'p1', 'p2'}
+    assert set(params.iter_params(Test())) == {'p1', 'p2'}

@@ -6,8 +6,15 @@ import numpy as np
 from nengo.config import SupportDefaultsMixin
 from nengo.exceptions import NotAddedToNetworkWarning, ValidationError
 from nengo.params import (
-    FrozenObject, get_params, is_param, IntParam, NumberParam,
-    Parameter, StringParam, Unconfigurable)
+    FrozenObject,
+    IntParam,
+    is_param,
+    iter_params,
+    NumberParam,
+    Parameter,
+    StringParam,
+    Unconfigurable,
+)
 from nengo.utils.compat import is_integer, range, with_metaclass
 from nengo.utils.numpy import as_shape, maxint
 
@@ -69,7 +76,7 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         state = self.__dict__.copy()
         del state['_initialized']
 
-        for attr in get_params(self):
+        for attr in iter_params(self):
             param = getattr(self.__class__, attr)
             if self in param:
                 state[attr] = getattr(self, attr)
@@ -82,7 +89,7 @@ class NengoObject(with_metaclass(NetworkMember, SupportDefaultsMixin)):
         for attr in self._param_init_order:
             setattr(self, attr, state.pop(attr))
 
-        for attr in get_params(self):
+        for attr in iter_params(self):
             if attr in state:
                 setattr(self, attr, state.pop(attr))
 
