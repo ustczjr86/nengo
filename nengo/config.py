@@ -32,8 +32,8 @@ class ClassParams(object):
     def __init__(self, configures):
         assert inspect.isclass(configures)
         self._configures = configures
-        self._extraparams = {}
-        self._defaultparams = tuple(
+        self._extra_params = {}
+        self._default_params = tuple(
             attr for attr in dir(self._configures)
             if is_param(getattr(self._configures, attr)))
 
@@ -68,7 +68,7 @@ class ClassParams(object):
 
     def __getstate__(self):
         state = {k: getattr(self, k) for k in (
-            '_configures', '_extraparams', '_defaultparams')}
+            '_configures', '_extra_params', '_default_params')}
 
         # Store all of the things we set in the params
         for attr in self.params():
@@ -80,8 +80,8 @@ class ClassParams(object):
 
     def __setstate__(self, state):
         self._configures = state['_configures']
-        self._defaultparams = tuple(state['_defaultparams'])
-        self._extraparams = dict(state['_extraparams'])
+        self._default_params = tuple(state['_default_params'])
+        self._extra_params = dict(state['_extra_params'])
 
         # Restore all of the things we set in the params
         for attr in self.params():
@@ -112,18 +112,18 @@ class ClassParams(object):
 
     @property
     def default_params(self):
-        return self._defaultparams
+        return self._default_params
 
     @property
     def extra_params(self):
-        return tuple(self._extraparams)
+        return tuple(self._extra_params)
 
     def params(self):
         return iter(self.default_params + self.extra_params)
 
     def get_param(self, key):
-        if key in self._extraparams:
-            return self._extraparams[key]
+        if key in self._extra_params:
+            return self._extra_params[key]
 
         return getattr(self._configures, key)
 
@@ -134,7 +134,7 @@ class ClassParams(object):
             raise ConfigError("'%s' is already a parameter in %s. "
                               "Please choose a different name."
                               % (key, self._configures.__name__))
-        self._extraparams[key] = value
+        self._extra_params[key] = value
 
     def update(self, d):
         """Sets a number of parameters at once given a dictionary."""
