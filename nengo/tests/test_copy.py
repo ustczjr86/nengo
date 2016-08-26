@@ -52,13 +52,6 @@ def make_ensemble():
     return e
 
 
-def test_neurons_reference_copy():
-    original = make_ensemble()
-    cp = original.copy(add_to_container=False)
-    assert original.neurons.ensemble is original
-    assert cp.neurons.ensemble is cp
-
-
 def make_probe():
     with nengo.Network():
         e = nengo.Ensemble(10, 1)
@@ -80,6 +73,26 @@ def make_connection():
     return c
 
 
+def make_function_connection():
+    with nengo.Network():
+        e1 = nengo.Ensemble(10, 1)
+        e2 = nengo.Ensemble(10, 1)
+        c = nengo.Connection(e1, e2, function=lambda x: x**2)
+    return c
+
+
+def make_learning_connection():
+    """Test pickling LearningRule and Neurons"""
+    with nengo.Network():
+        e1 = nengo.Ensemble(10, 1)
+        e2 = nengo.Ensemble(11, 1)
+        c = nengo.Connection(e1.neurons, e2.neurons,
+                             transform=np.ones((11, 10)))
+        c.learning_rule_type = nengo.PES()
+        nengo.Connection(e2, c.learning_rule)
+    return c
+
+
 def make_network():
     with nengo.Network() as model:
         e1 = nengo.Ensemble(10, 1)
@@ -87,6 +100,20 @@ def make_network():
         nengo.Connection(e1, e2, transform=2.)
         nengo.Probe(e2)
     return model
+
+
+def test_neurons_reference_copy():
+    original = make_ensemble()
+    cp = original.copy(add_to_container=False)
+    assert original.neurons.ensemble is original
+    assert cp.neurons.ensemble is cp
+
+
+def test_learningrule_reference_copy():
+    original = make_learning_connection()
+    cp = original.copy(add_to_container=False)
+    assert original.learning_rule.connection is original
+    assert cp.learning_rule.connection is cp
 
 
 def test_copy_in_network_default_add():
@@ -156,6 +183,8 @@ def test_network_copy_builds(RefSimulator):
     (make_probe, assert_is_copy),
     (make_node, assert_is_copy),
     (make_connection, assert_is_copy),
+    (make_function_connection, assert_is_copy),
+    (make_learning_connection, assert_is_copy),
     (make_network, assert_is_copy),
 ])
 class TestCopy(object):
