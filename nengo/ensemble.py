@@ -5,6 +5,7 @@ from nengo.dists import DistOrArrayParam, Uniform, UniformHypersphere
 from nengo.exceptions import ReadonlyError
 from nengo.neurons import LIF, NeuronTypeParam, Direct
 from nengo.params import Default, IntParam, NumberParam
+from nengo.utils.compat import iteritems
 
 
 class Ensemble(NengoObject):
