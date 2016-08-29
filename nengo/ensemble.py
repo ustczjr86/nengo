@@ -163,6 +163,10 @@ class Ensemble(NengoObject):
     def __len__(self):
         return self.dimensions
 
+    def __setstate__(self, state):
+        state['_neurons'] = Neurons(self)
+        super(Ensemble, self).__setstate__(state)
+
     @property
     def neurons(self):
         """A direct interface to the neurons in the ensemble."""

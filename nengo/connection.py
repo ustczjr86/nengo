@@ -444,21 +444,43 @@ class Connection(NengoObject):
     def learning_rule(self):
         """(LearningRule or iterable) Connectable learning rule object(s)."""
         if self.learning_rule_type is not None and self._learning_rule is None:
-            types = self.learning_rule_type
-            if isinstance(types, dict):
-                self._learning_rule = type(types)()  # dict of same type
-                for k, v in iteritems(types):
-                    self._learning_rule[k] = LearningRule(self, v)
-            elif is_iterable(types):
-                self._learning_rule = [LearningRule(self, v) for v in types]
-            elif isinstance(types, LearningRuleType):
-                self._learning_rule = LearningRule(self, types)
-            else:
-                raise ValidationError(
-                    "Invalid type %r" % type(types).__name__,
-                    attr='learning_rule_type', obj=self)
-
+            self._learning_rule = self._create_learning_rule(
+                self.learning_rule_type)
         return self._learning_rule
+
+    def _create_learning_rule(self, types):
+        if isinstance(types, dict):
+            learning_rule = type(types)()  # dict of same type
+            for k, v in iteritems(types):
+                learning_rule[k] = LearningRule(self, v)
+        elif is_iterable(types):
+            learning_rule = [LearningRule(self, v) for v in types]
+        elif isinstance(types, LearningRuleType):
+            learning_rule = LearningRule(self, types)
+        else:
+            raise ValidationError(
+                "Invalid type %r" % type(types).__name__,
+                attr='learning_rule_type', obj=self)
+        return learning_rule
+
+    # def __getstate__(self):
+        # state = super(Connection, self).__getstate__()
+        # del state['_learning_rule']
+        # return state
+
+    def __getstate__(self):
+        state = super(Connection, self).__getstate__()
+        print(state)
+        return state
+
+    def __setstate__(self, state):
+        state['_learning_rule'] = None
+        super(Connection, self).__setstate__(state)
+        # if state['learning_rule_type'] is not None:
+            # state['_learning_rule'] = self._create_learning_rule(
+                # state['learning_rule_type'])
+        print('s', state)
+        # super(Connection, self).__setstate__(state)
 
     @property
     def post_obj(self):
@@ -525,6 +547,16 @@ class LearningRule(object):
     def __str__(self):
         return "<LearningRule modifying %s with type %s>" % (
             self.connection, self.learning_rule_type)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['_connection'] = self._connection()
+        return state
+
+    def __setstate__(self, state):
+        self._connection = weakref.ref(state.pop('_connection'))
+        for k, v in iteritems(state):
+            setattr(self, k, v)
 
     @property
     def connection(self):
