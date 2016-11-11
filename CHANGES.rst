@@ -51,6 +51,13 @@ Release History
   (`#1145 <https://github.com/nengo/nengo/issues/1145>`_,
   `#1173 <https://github.com/nengo/nengo/pull/1173>`_)
 
+**Fixed**
+
+- Properly handle non C-contiguous node outputs.
+  (`#1184 <https://github.com/nengo/nengo/issues/1184>`_,
+  `#1185 <https://github.com/nengo/nengo/pull/1185>`_)
+
+
 2.2.0 (September 12, 2016)
 ==========================
 
