@@ -113,7 +113,7 @@ class Vocabulary(Mapping):
         """Return the semantic pointer with the requested name."""
         if not self.strict and key not in self:
             assert '.' not in key
-            assert ',' not in key
+            assert ';' not in key
             self.populate(key)
         return self.pointers[key]
 
@@ -141,7 +141,7 @@ class Vocabulary(Mapping):
         self._vectors = np.vstack([self._vectors, p.v])
 
     def populate(self, pointers):
-        for p_expr in pointers.split(','):
+        for p_expr in pointers.split(';'):
             assign_split = p_expr.split('=', 1)
             modifier_split = p_expr.split('.', 1)
             if len(assign_split) > 1:
