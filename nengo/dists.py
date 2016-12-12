@@ -311,6 +311,43 @@ class Choice(Distribution):
         return self.options[i]
 
 
+class Samples(Distribution):
+    """A set of samples.
+
+    This class is a subclass of `.Distribution` so that it can be used in any
+    situation that calls for a  `.Distribution`. However, the call to `.sample`
+    must match the dimensions of the samples or a `.ValidationError`
+    will be raised.
+
+    Parameters
+    ----------
+    samples : (n, d) array_like
+        ``n`` and ``d`` must match what is eventually passed to `.sample`.
+    """
+
+    samples = NdarrayParam('samples', shape=('...',))
+
+    def __init__(self, samples):
+        super(Samples, self).__init__()
+        self.samples = samples
+
+    def __repr__(self):
+        return "Samples(samples=%r)" % self.samples
+
+    def sample(self, n, d=None, rng=np.random):
+        samples = np.array(self.samples)
+        shape = (n,) if d is None else (n, d)
+
+        if d is None:
+            samples = samples.squeeze()
+
+        if samples.shape[0] != shape[0]:
+            raise ValidationError("Wrong number of samples requested; got "
+                                  "%d, should be %d" % (n, samples.shape[0]),
+                                  attr='samples', obj=self)
+        return samples
+
+
 class SqrtBeta(Distribution):
     """Distribution of the square root of a Beta distributed random variable.
 
