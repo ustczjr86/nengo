@@ -2,6 +2,7 @@ import re
 
 import numpy as np
 from numpy.testing import assert_almost_equal
+import pytest
 
 from nengo.spa.utils import pairs, prob_cleanup, similarity, text
 from nengo.spa.vocab import Vocabulary
@@ -71,6 +72,8 @@ def test_text(rng):
 
 
 def test_prob_cleanup(rng):
+    pytest.importorskip('scipy')
+
     assert 1.0 > prob_cleanup(0.7, 64, 10000) > 0.9999
     assert 0.9999 > prob_cleanup(0.6, 64, 10000) > 0.999
     assert 0.99 > prob_cleanup(0.5, 64, 1000) > 0.9
