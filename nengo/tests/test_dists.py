@@ -141,6 +141,10 @@ def test_samples_errors(rng):
     with pytest.raises(ValidationError):
         dists.Samples(samples).sample(12)
 
+    samples = rng.random_sample(size=12)
+    with pytest.raises(ValidationError):
+        dists.Samples(samples).sample(12, 2)
+
 
 @pytest.mark.parametrize("n,m", [(99, 1), (50, 50)])
 def test_sqrt_beta(n, m, rng):
