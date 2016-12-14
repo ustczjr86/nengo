@@ -119,7 +119,7 @@ class NotAddedToNetworkWarning(NengoWarning):
             "networks manually.".format(obj=self.obj))
 
 
-def CacheIndexReplaceFailedWarning(NengoWarning):
+class CacheIndexReplaceFailedWarning(NengoWarning):
     """The replace operation on the newly written cache index failed."""
 
     def __init__(self, cache_index):
