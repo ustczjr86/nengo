@@ -119,22 +119,5 @@ class NotAddedToNetworkWarning(NengoWarning):
             "networks manually.".format(obj=self.obj))
 
 
-class CacheIndexReplaceFailedWarning(NengoWarning):
-    """The replace operation on the newly written cache index failed."""
-
-    def __init__(self, cache_index):
-        super(CacheIndexReplaceFailedWarning, self).__init__()
-        self.cache_index = cache_index
-
-    def __str__(self):
-        return (
-            "The cache index could not be updated because another program "
-            "blocked access to it. This is commonly caused by anti-virus "
-            "software. It is safe to ignore this warning. But if you see it "
-            "a lot, you might want to consider doing one of the following "
-            "for the best Nengo performance:\n"
-            "1. Try using Python 3 instead of Python 2.\n"
-            "2. Configure your anti-virus to ignore the Nengo cache folder "
-            "('{cache_dir}').\n"
-            "3. Disable the cache.\n"
-            .format(cache_dir=self.cache_index.cache_dir))
+class CacheIOWarning(NengoWarning):
+    """A non-critical issue in accessing files in the cache."""

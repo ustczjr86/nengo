@@ -14,8 +14,7 @@ import warnings
 import numpy as np
 
 from nengo.exceptions import (
-    CacheIndexReplaceFailedWarning, CacheIOError, FingerprintError,
-    TimeoutError)
+    CacheIOError, CacheIOWarning, FingerprintError, TimeoutError)
 from nengo.neurons import (AdaptiveLIF, AdaptiveLIFRate, Direct, Izhikevich,
                            LIF, LIFRate, RectifiedLinear, Sigmoid)
 from nengo.rc import rc
@@ -403,7 +402,18 @@ class WriteableCacheIndex(CacheIndex):
             # another program like a virus scanner is accessing the file to be
             # moved. There is not a lot we could do about this. See
             # <https://github.com/nengo/nengo/issues/1200> for more info.
-            warnings.warn(CacheIndexReplaceFailedWarning(self))
+            warnings.warn(
+                "The cache index could not be updated because another program "
+                "blocked access to it. This is commonly caused by anti-virus "
+                "software. It is safe to ignore this warning. But if you see "
+                "it a lot, you might want to consider doing one of the "
+                "following for the best Nengo performance:\n"
+                "1. Try using Python 3 instead of Python 2.\n"
+                "2. Configure your anti-virus to ignore the Nengo cache "
+                "folder ('{cache_dir}').\n"
+                "3. Disable the cache.\n"
+                .format(cache_dir=self.cache_dir), category=CacheIOWarning)
+
         if os.path.exists(self.legacy_path):
             os.remove(self.legacy_path)
 
