@@ -19,7 +19,7 @@ When the ``pre`` object is anything else,
 Nengo will create a direct connection.
 
 The ``post`` object
-it is only used to determine
+is only used to determine
 which signal will receive the data
 produced by the connection.
 If you're not sure what your connection
