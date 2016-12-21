@@ -64,7 +64,7 @@ as implementing the following equation:
 where
 
 - :math:`\mathbf{y}(t)` is the output of the connection at time :math:`t`,
-- :math:`i` is the number of neurons in the pre ensemble
+- :math:`n` is the number of neurons in the pre ensemble
 - :math:`\mathbf{d}^{f}_i` is the decoding weight associated
   with neuron :math:`i` given the function :math:`f`,
 - :math:`a_i(x(t))` is the activity of neuron :math:`i` given
