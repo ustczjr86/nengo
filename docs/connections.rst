@@ -120,6 +120,9 @@ that one should keep in mind when using decoded connections.
   can determine why your function is not
   being approximated well.
 
+  Concrete examples of how the properties of ``pre`` ensemble influence the
+  desired function can be found in [1]_, [2]_.
+
 Direct connections
 ==================
 
@@ -137,7 +140,7 @@ weights are automatically determined
 through decoder solving.
 In direct connections,
 weights can be manually specified
-through the ``transform`` argument. [1]_
+through the ``transform`` argument. [3]_
 
 The most common example of a direct connection
 is a neuron-to-neuron connection.
@@ -324,7 +327,15 @@ so this type of direct connection can be useful
 when saving the weights in a learning network
 and loading it up in the future.
 
-.. [1] Note that decoded connections
+.. [1] Gosmann, Jan. Precise multiplications with the NEF.
+       Waterloo, Ontario, Canada: University of Waterloo; 2015.
+       Available from: http://dx.doi.org/10.5281/zenodo.35680
+.. [2] Gosmann, Jan, and Chris Eliasmith. “Optimizing Semantic Pointer
+       Representations for Symbol-Like Processing in Spiking Neural Networks.”
+       PLoS ONE 11, no. 2 (February 22, 2016): e0149928.
+       `doi:10.1371/journal.pone.0149928
+       <http://dx.doi.org/10.1371%2Fjournal.pone.0149928>`_.
+.. [3] Note that decoded connections
        also accept the ``transform`` argument.
        In the case of decoded connections,
        the ``transform`` is a linear operation
