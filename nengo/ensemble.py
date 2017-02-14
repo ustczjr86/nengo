@@ -2,10 +2,11 @@ from nengo.base import NengoObject, ObjView, ProcessParam
 from nengo.dists import DistOrArrayParam, Uniform, UniformHypersphere
 from nengo.exceptions import ReadonlyError
 from nengo.neurons import LIF, NeuronTypeParam, Direct
-from nengo.params import Default, IntParam, NumberParam
+from nengo.params import Default, IntParam, NumberParam, BoolParam
 
 
 class Ensemble(NengoObject):
+
     """A group of neurons that collectively represent a vector.
 
     Parameters
@@ -59,6 +60,8 @@ class Ensemble(NengoObject):
         A name for the ensemble. Used for debugging and visualization.
     seed : int, optional (Default: None)
         The seed used for random number generation.
+    normalize_encoders : bool, optional (Default: True)
+        Indicates whether the encoders should be normalized
 
     Attributes
     ----------
@@ -134,6 +137,8 @@ class Ensemble(NengoObject):
                             optional=True,
                             sample_shape=('n_neurons',))
     noise = ProcessParam('noise', default=None, optional=True)
+    normalize_encoders = BoolParam(
+        'normalize_encoders', default=True, optional=True)
 
     def __init__(self, n_neurons, dimensions, radius=Default, encoders=Default,
                  intercepts=Default, max_rates=Default, eval_points=Default,
@@ -180,6 +185,7 @@ class Ensemble(NengoObject):
 
 
 class Neurons(object):
+
     """An interface for making connections directly to an ensemble's neurons.
 
     This should only ever be accessed through the ``neurons`` attribute of an
@@ -189,6 +195,7 @@ class Neurons(object):
 
         nengo.Connection(a.neurons, b.neurons)
     """
+
     def __init__(self, ensemble):
         self._ensemble = ensemble
 

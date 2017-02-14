@@ -30,6 +30,9 @@ Release History
   easier to activate direct mode in networks where some parts require neurons.
   (`#1111 <https://github.com/nengo/nengo/issues/1111>`_,
   `#1168 <https://github.com/nengo/nengo/pull/1168>`_)
+- Added the option to not normalize encoders with ``<ensemble>.normalize_encoders = False``.
+  (`#1191 <https://github.com/nengo/nengo/issues/1191>`_,
+  `#1267 <https://github.com/nengo/nengo/pull/1267>`_)
 
 **Fixed**
 
