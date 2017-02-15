@@ -22,8 +22,8 @@ matrix:
     - env: PYTHON="2.7" NUMPY="1.9"
     - env: PYTHON="2.7" NUMPY="1.10"
     - env: PYTHON="3.4"
-    - env: PYTHON="3.5" COVERAGE="true"
-    - env: PYTHON="3.5" COVERAGE="true" SCIPY="true"
+    - env: PYTHON="3.5"
+    - env: PYTHON="3.6" COVERAGE="true" SCIPY="true"
 
 # Setup Miniconda
 before_install:
