@@ -55,12 +55,12 @@ class Ensemble(NengoObject):
         Random noise injected directly into each neuron in the ensemble
         as current. A sample is drawn for each individual neuron on
         every simulation step.
+    normalize_encoders : bool, optional (Default: True)
+        Indicates whether the encoders should be normalized
     label : str, optional (Default: None)
         A name for the ensemble. Used for debugging and visualization.
     seed : int, optional (Default: None)
         The seed used for random number generation.
-    normalize_encoders : bool, optional (Default: True)
-        Indicates whether the encoders should be normalized
 
     Attributes
     ----------
