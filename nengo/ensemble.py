@@ -15,7 +15,6 @@ class Ensemble(NengoObject):
         The number of neurons.
     dimensions : int
         The number of representational dimensions.
-
     radius : int, optional (Default: 1.0)
         The representational radius of the ensemble.
     encoders : Distribution or (n_neurons, dimensions) array_like, optional \
@@ -143,7 +142,8 @@ class Ensemble(NengoObject):
     def __init__(self, n_neurons, dimensions, radius=Default, encoders=Default,
                  intercepts=Default, max_rates=Default, eval_points=Default,
                  n_eval_points=Default, neuron_type=Default, gain=Default,
-                 bias=Default, noise=Default, label=Default, seed=Default):
+                 bias=Default, noise=Default, label=Default, seed=Default,
+                 normalize_encoders=Default):
         super(Ensemble, self).__init__(label=label, seed=seed)
         self.n_neurons = n_neurons
         self.dimensions = dimensions
@@ -157,6 +157,7 @@ class Ensemble(NengoObject):
         self.gain = gain
         self.neuron_type = neuron_type
         self.noise = noise
+        self.normalize_encoders = normalize_encoders
 
     def __getitem__(self, key):
         return ObjView(self, key)
