@@ -142,8 +142,8 @@ class Ensemble(NengoObject):
     def __init__(self, n_neurons, dimensions, radius=Default, encoders=Default,
                  intercepts=Default, max_rates=Default, eval_points=Default,
                  n_eval_points=Default, neuron_type=Default, gain=Default,
-                 bias=Default, noise=Default, label=Default, seed=Default,
-                 normalize_encoders=Default):
+                 bias=Default, noise=Default, normalize_encoders=Default,
+                 label=Default, seed=Default):
         super(Ensemble, self).__init__(label=label, seed=seed)
         self.n_neurons = n_neurons
         self.dimensions = dimensions
